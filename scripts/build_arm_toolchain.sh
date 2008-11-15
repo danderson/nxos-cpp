@@ -15,16 +15,16 @@ SRCDIR=$ROOT/src
 BUILDDIR=$ROOT/build
 PREFIX=$ROOT/install
 
-GCC_URL=ftp://ftp.irisa.fr/pub/mirrors/gcc.gnu.org/gcc/releases/gcc-4.2.2/gcc-core-4.2.2.tar.bz2
-GCC_VERSION=4.2.2
+GCC_URL=ftp://ftp.irisa.fr/pub/mirrors/gcc.gnu.org/gcc/releases/gcc-4.3.2/gcc-4.3.2.tar.bz2
+GCC_VERSION=4.3.2
 GCC_DIR=gcc-$GCC_VERSION
 
-BINUTILS_URL=http://ftp.gnu.org/gnu/binutils/binutils-2.18.tar.bz2
-BINUTILS_VERSION=2.18
+BINUTILS_URL=http://ftp.gnu.org/gnu/binutils/binutils-2.19.tar.bz2
+BINUTILS_VERSION=2.19
 BINUTILS_DIR=binutils-$BINUTILS_VERSION
 
-NEWLIB_URL=ftp://sources.redhat.com/pub/newlib/newlib-1.15.0.tar.gz
-NEWLIB_VERSION=1.15.0
+NEWLIB_URL=ftp://sources.redhat.com/pub/newlib/newlib-1.16.0.tar.gz
+NEWLIB_VERSION=1.16.0
 NEWLIB_DIR=newlib-$NEWLIB_VERSION
 
 echo "I will build an arm-elf cross-compiler:
@@ -91,25 +91,65 @@ export PATH=$PREFIX/bin:$PATH
 #
 (
 (
-# First we need to patch binutils, because makeinfo 4.11 fails the
-# autoconf check.
+# Binutils must first be patched to be buildable by gcc 4.3.
+#
+# I'm not sure of the exact resolution (looks like there is some
+# debate on the GCC mailing list), but this workaround is fine for our
+# uses, since ARM7 doesn't have these fancy registers anyway.
 cd $SRCDIR/$BINUTILS_DIR
-patch -p0 <<"EOF"
---- configure~ 2007-10-10 22:14:56.000000000 +1300
-+++ configure 2007-10-10 22:14:56.000000000 +1300
-@@ -3680,7 +3680,7 @@
-     # For an installed makeinfo, we require it to be from texinfo 4.4 or
-     # higher, else we use the "missing" dummy.
-     if ${MAKEINFO} --version \
--       | egrep 'texinfo[^0-9]*([1-3][0-9]|4\.[4-9]|[5-9])' >/dev/null 2>&1; then
-+       | egrep 'texinfo[^0-9]*([1-3][0-9]|4\.([4-9]|[1-9][0-9])|[5-9])' >/dev/null 2>&1; then
-       :
-     else
-       MAKEINFO="$MISSING makeinfo"
+
+patch -p1 <<EOF
+--- binutils-2.19/gas/config/tc-arm.c	2008-08-13 01:39:30.000000000 +0200
++++ binutils-2.19.fixed/gas/config/tc-arm.c	2008-11-15 06:00:18.000000000 +0100
+@@ -3456,7 +3456,7 @@
+
+       if (reg == FAIL)
+ 	{
+-	  as_bad (_(reg_expected_msgs[REG_TYPE_MMXWR]));
++	  as_bad ("Expected register");
+ 	  goto error;
+ 	}
+
+@@ -3470,7 +3470,7 @@
+ 	  hi_reg = arm_reg_parse (&input_line_pointer, REG_TYPE_MMXWR);
+ 	  if (hi_reg == FAIL)
+ 	    {
+-	      as_bad (_(reg_expected_msgs[REG_TYPE_MMXWR]));
++	      as_bad ("Expected register");
+ 	      goto error;
+ 	    }
+ 	  else if (reg >= hi_reg)
+@@ -3588,7 +3588,7 @@
+
+       if (reg == FAIL)
+ 	{
+-	  as_bad (_(reg_expected_msgs[REG_TYPE_MMXWCG]));
++	  as_bad ("Expected register");
+ 	  goto error;
+ 	}
+
+@@ -3603,7 +3603,7 @@
+ 	  hi_reg = arm_reg_parse (&input_line_pointer, REG_TYPE_MMXWCG);
+ 	  if (hi_reg == FAIL)
+ 	    {
+-	      as_bad (_(reg_expected_msgs[REG_TYPE_MMXWCG]));
++	      as_bad ("Expected register");
+ 	      goto error;
+ 	    }
+ 	  else if (reg >= hi_reg)
+@@ -3709,7 +3709,7 @@
+   reg = arm_reg_parse (&input_line_pointer, REG_TYPE_RN);
+   if (reg == FAIL)
+     {
+-      as_bad (_(reg_expected_msgs[REG_TYPE_RN]));
++      as_bad ("Expected register");
+       ignore_rest_of_line ();
+       return;
+     }
 EOF
 ) || exit 1
 
-# Now, build it.
+# Build binutils.
 mkdir -p $BUILDDIR/$BINUTILS_DIR
 cd $BUILDDIR/$BINUTILS_DIR
 
@@ -136,7 +176,7 @@ cd $BUILDDIR/$GCC_DIR
 
 $SRCDIR/$GCC_DIR/configure --target=arm-elf --prefix=$PREFIX \
     --enable-interwork --enable-multilib --with-float=soft \
-    --enable-languages="c" --with-newlib \
+    --enable-languages="c,c++" --with-newlib \
     --with-headers=$SRCDIR/$NEWLIB_DIR/newlib/libc/include \
     && make all-gcc install-gcc
 ) || exit 1
@@ -145,25 +185,6 @@ $SRCDIR/$GCC_DIR/configure --target=arm-elf --prefix=$PREFIX \
 # Stage 3: Build and install newlib
 #
 (
-(
-# Same issue, we have to patch to support makeinfo >= 4.11.
-cd $SRCDIR/$NEWLIB_DIR
-patch -p0 <<"EOF"
---- configure~ 2007-10-10 22:14:56.000000000 +1300
-+++ configure 2007-10-10 22:14:56.000000000 +1300
-@@ -3680,7 +3680,7 @@
-     # For an installed makeinfo, we require it to be from texinfo 4.4 or
-     # higher, else we use the "missing" dummy.
-     if ${MAKEINFO} --version \
--       | egrep 'texinfo[^0-9]*([1-3][0-9]|4\.[4-9]|[5-9])' >/dev/null 2>&1; then
-+       | egrep 'texinfo[^0-9]*([1-3][0-9]|4\.([4-9]|[1-9][0-9])|[5-9])' >/dev/null 2>&1; then
-       :
-     else
-       MAKEINFO="$MISSING makeinfo"
-EOF
-) || exit 1
-
-# And now we can build it.
 mkdir -p $BUILDDIR/$NEWLIB_DIR
 cd $BUILDDIR/$NEWLIB_DIR
 
