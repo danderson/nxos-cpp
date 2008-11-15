@@ -1,1 +1,7 @@
 *~
+config.log
+.sconsign.dblite
+*.pyc
+*.o
+*.elf
+*.bin
