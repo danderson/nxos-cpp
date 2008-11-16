@@ -197,9 +197,9 @@ if not env.GetOption('clean'):
                                           'CheckLibGcc': CheckLibGcc,
                                           'CheckDoxygen': CheckDoxygen})
     conf.env['CROSS_COMPILE_HOST'] = 'arm-elf'
-    if not (conf.CheckTool('CC', 'gcc') and conf.CheckTool('AR') and
-            conf.CheckTool('OBJCOPY') and conf.CheckTool('LINK', 'ld') and
-            conf.CheckLibGcc(conf.env['CC'])):
+    if not (conf.CheckTool('CC', 'gcc') and conf.CheckTool('CXX', 'g++') and
+            conf.CheckTool('AR') and conf.CheckTool('OBJCOPY') and
+            conf.CheckTool('LINK', 'ld') and conf.CheckLibGcc(conf.env['CC'])):
         print "Missing or incomplete arm-elf toolchain, cannot continue!"
         Exit(1)
     conf.CheckDoxygen()
@@ -222,3 +222,7 @@ else:
     appkernels = env['appkernels']
 systems_to_build = ['systems/%s/SConscript' % x for x in appkernels]
 SConscript(['base/SConscript'] + systems_to_build, 'env CheckTool')
+
+# Build documentation, if there is any.
+if env['WITH_DOXYGEN']:
+    env.Doxygen('Doxyfile')
