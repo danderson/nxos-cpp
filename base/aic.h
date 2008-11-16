@@ -2,7 +2,7 @@
  *  @brief Advanced Interrupt Controller driver.
  */
 
-/* Copyright (c) 2007,2008 the NxOS developers
+/* Copyright (c) 2008 the NxOS developers
  *
  * See AUTHORS for a full list of the developers.
  *
