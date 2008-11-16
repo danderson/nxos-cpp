@@ -43,7 +43,7 @@
 #  define AT91SAM7S256_H
 
 #ifdef __cplusplus
-namespace hw {
+extern "C" {
 #endif
 
 typedef volatile unsigned int AT91_REG;	// Hardware register definition
