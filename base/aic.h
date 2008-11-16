@@ -53,7 +53,8 @@ class AIC {
 
   static void InstallHandler(U32 irq_id, enum aic_priority priority,
                              enum aic_trigger_mode trigger_mode,
-                      closure_t handler);
+                             closure_t handler);
+  static void UninstallHandler(U32 irq_id);
 
   static void Mask(U32 irq_id) { *AT91C_AIC_IECR = (1 << irq_id); }
   static void Unmask(U32 irq_id) { *AT91C_AIC_IDCR = (1 << irq_id); }

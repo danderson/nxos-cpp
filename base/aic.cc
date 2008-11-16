@@ -58,9 +58,16 @@ void AIC::InstallHandler(U32 irq_id, enum aic_priority priority,
   Clear(irq_id);
 
   AT91C_AIC_SMR[irq_id] = (trigger_mode << 5) | priority;
-  AT91C_AIC_SVR[irq_id] = reinterpret_cast<U32>(handler);
+  AT91C_AIC_SVR[irq_id] = (U32) handler;
 
   Unmask(irq_id);
+}
+
+void AIC::UninstallHandler(U32 irq_id) {
+  Mask(irq_id);
+  Clear(irq_id);
+
+  AT91C_AIC_SVR[irq_id] = (U32) nxos__unhandled_exception;
 }
 
 }  // namespace nxos
