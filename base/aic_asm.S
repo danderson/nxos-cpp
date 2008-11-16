@@ -146,16 +146,16 @@ nxos__interrupts_mask:
 	orr r1, r1, #IRQ_FIQ_MASK
 	msr cpsr_c, r1
 
-	ldr r1, [r0]
+	ldrb r1, [r0]
 	add r1, r1, #1
-	str r1, [r0]
+	strb r1, [r0]
 
 	bx lr
 
 nxos__interrupts_unmask:
-	ldr r1, [r0]
+	ldrb r1, [r0]
 	subs r1, r1, #1
-	str r1, [r0]
+	strb r1, [r0]
 
 	bxne lr
 

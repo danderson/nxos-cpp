@@ -17,11 +17,19 @@
  */
 extern void nxos_appkernel_main(void);
 
-
+namespace nxos {
 namespace {
 
+void test() {}
+
 void init() {
-  nxos::AIC().Initialize();
+  AIC::Initialize();
+  AIC::InstallHandler(10, AIC::PRIO_USER,
+                      AIC::TRIG_LEVEL, test);
+  AIC::Mask(10);
+  AIC::Trigger(10);
+  AIC::Unmask(10);
+
 //   nx_interrupts_enable();
 //   nx__systick_init();
 //   nx__sound_init();
@@ -36,14 +44,15 @@ void halt() {
 }
 
 }  // namespace
+}  // namespace nxos
 
 
 extern "C" {
 
 void nxos__baseplate_main(void) {
-  init();
+  nxos::init();
   nxos_appkernel_main();
-  halt();
+  nxos::halt();
 }
 
 }  // extern "C"

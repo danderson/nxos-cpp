@@ -9,7 +9,6 @@
 #include "at91sam7s256.h"
 
 #include "base/types.h"
-
 #include "base/aic.h"
 
 extern "C" {
@@ -19,7 +18,9 @@ extern void nxos__unhandled_exception();
 
 namespace nxos {
 
-void AICDriver::Initialize() {
+U8 AIC::mask_nesting_level_ = 0;
+
+void AIC::Initialize() {
   MaskAll();
 
   // If we're coming from a warm boot, the AIC may be in a weird
@@ -50,16 +51,16 @@ void AICDriver::Initialize() {
   UnmaskAll();
 }
 
-void AICDriver::InstallHandler(U32 irq_id, enum aic_priority priority,
-                               enum aic_trigger_mode trigger_mode,
-                               closure_t handler) {
-  Disable(irq_id);
+void AIC::InstallHandler(U32 irq_id, enum aic_priority priority,
+                         enum aic_trigger_mode trigger_mode,
+                         closure_t handler) {
+  Mask(irq_id);
   Clear(irq_id);
 
   AT91C_AIC_SMR[irq_id] = (trigger_mode << 5) | priority;
   AT91C_AIC_SVR[irq_id] = reinterpret_cast<U32>(handler);
 
-  Enable(irq_id);
+  Unmask(irq_id);
 }
 
 }  // namespace nxos
