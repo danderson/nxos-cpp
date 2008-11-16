@@ -30,6 +30,7 @@ class Core {
 
  private:
   static void init() {
+    Power::Initialize();
     AIC::Initialize();
     Time::Initialize();
   }
