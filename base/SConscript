@@ -2,6 +2,6 @@ from glob import glob
 
 Import('env')
 
-for source in glob('*.[cS]')+glob('drivers/*.[cS]'):
+for source in glob('*.[cS]') + glob('*.cc'):
     obj = env.Object(source.split('.')[0], source)
     env.Append(NXOS_BASEPLATE=obj)

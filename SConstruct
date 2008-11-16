@@ -186,7 +186,7 @@ Examples
 # Construct and configure a cross-compiler environment
 ###############################################################
 env = Environment(options = opts,
-                  tools = ['gcc', 'as', 'gnulink', 'ar',
+                  tools = ['gcc', 'g++', 'as', 'gnulink', 'ar',
                            'doxygen', appkernel_tool],
                   toolpath = ['scons_tools'],
                   NXOS_LIBGCC = [], CPPPATH = '#',
@@ -205,13 +205,13 @@ if not env.GetOption('clean'):
     conf.CheckDoxygen()
     env = conf.Finish()
 
-env.Replace(CCFLAGS= ['-mcpu=arm7tdmi', '-Os', '-Wextra', '-Wall', '-Werror',
-                      '-Wno-div-by-zero', '-Wfloat-equal', '-Wshadow',
-                      '-Wpointer-arith', '-Wbad-function-cast',
-                      '-Wmissing-prototypes', '-ffreestanding',
-                      '-fsigned-char', '-ffunction-sections',
-                      '-fdata-sections', '-fomit-frame-pointer',
-                      '-msoft-float', '-mthumb-interwork', '-mthumb'],
+env.Replace(CCFLAGS = ['-mcpu=arm7tdmi', '-Os', '-Wextra', '-Wall', '-Werror',
+                       '-Wno-div-by-zero', '-Wfloat-equal', '-Wshadow',
+                       '-Wpointer-arith', '-ffreestanding',
+                       '-fsigned-char', '-ffunction-sections',
+                       '-fdata-sections', '-fomit-frame-pointer',
+                       '-msoft-float', '-mthumb-interwork', '-mthumb'],
+            CFLAGS = ['-Wbad-function-cast', '-Wmissing-prototypes'],
             ASFLAGS = ['-Wall', '-Werror', '-Os',
                        '-Wa,-mcpu=arm7tdmi,-mfpu=softfpa,-mthumb-interwork'])
 
