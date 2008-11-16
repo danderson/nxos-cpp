@@ -30,6 +30,7 @@ typedef signed long S32; /**< Signed 32-bit integer. */
 
 /** A function that takes no arguments and returns nothing. */
 typedef void (*closure_t)(void);
+typedef void (&closure_ref_t)(void);
 
 /*@}*/
 
