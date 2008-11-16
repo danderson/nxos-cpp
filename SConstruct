@@ -1,7 +1,7 @@
 import os
 import os.path
 import new
-from glob import glob
+from fnmatch import fnmatch
 
 ###############################################################
 # Utility functions.
@@ -31,6 +31,16 @@ def determine_gcc_version(gcc_binary):
         elif token == '(GCC)':
             grab_next = True
     return None
+
+# Recursive version of glob, where a * can be several directory levels.
+def rglob(search_root, pattern):
+    out = []
+    for root, dirs, files in os.walk(search_root):
+        for file in files:
+            fullpath = os.path.join(root, file)
+            if fnmatch(fullpath, pattern):
+                out.append(fullpath)
+    return out
 
 # Check that a given cross-compiler tool exists. If it does, the path is
 # added to the build environment, and the given environment variable is
@@ -150,8 +160,7 @@ def appkernel_tool(env):
 ###############################################################
 # Options that can be provided on the commandline
 ###############################################################
-buildable_systems = [os.path.split(os.path.dirname(x))[1]
-                     for x in glob('systems/*/SConscript')]
+buildable_systems = [x[8:-11] for x in rglob('systems', '*/SConscript')]
 
 opts = Options('build_flags.py')
 opts.Add(ListOption('appkernels',

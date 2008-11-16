@@ -5,3 +5,5 @@ config.log
 *.o
 *.elf
 *.bin
+*.lds
+!systems/appkernel.lds
