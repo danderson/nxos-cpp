@@ -21,4 +21,6 @@
   TypeName();                                   \
   DISALLOW_COPY_AND_ASSIGN(TypeName)
 
+#define UNUSED __attribute__((unused))
+
 #endif  // __NXOS_BASE_CPP_DECLS_H__

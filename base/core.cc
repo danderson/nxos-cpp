@@ -9,6 +9,7 @@
 #include "at91sam7s256.h"
 
 #include "base/aic.h"
+#include "base/time.h"
 #include "base/types.h"
 
 
@@ -18,41 +19,31 @@
 extern void nxos_appkernel_main(void);
 
 namespace nxos {
-namespace {
 
-void test() {}
+class Core {
+ public:
+  static void main() {
+    init();
+    nxos_appkernel_main();
+    halt();
+  }
 
-void init() {
-  AIC::Initialize();
-  AIC::InstallHandler(10, AIC::PRIO_USER,
-                      AIC::TRIG_LEVEL, test);
-  AIC::Mask(10);
-  AIC::Trigger(10);
-  AIC::Unmask(10);
+ private:
+  static void init() {
+    AIC::Initialize();
+    Time::Initialize();
+  }
 
-//   nx_interrupts_enable();
-//   nx__systick_init();
-//   nx__sound_init();
-//   nx__avr_init();
+  static void halt() {}
+};
 
-//   /* Delay a little post-init, to let all the drivers settle down. */
-//   nx_systick_wait_ms(100);
-}
-
-void halt() {
-//   nx__avr_power_down();
-}
-
-}  // namespace
 }  // namespace nxos
 
 
 extern "C" {
 
 void nxos__baseplate_main(void) {
-  nxos::init();
-  nxos_appkernel_main();
-  nxos::halt();
+  nxos::Core::main();
 }
 
 }  // extern "C"
