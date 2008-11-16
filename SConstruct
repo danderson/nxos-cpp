@@ -212,6 +212,7 @@ env.Replace(CCFLAGS = ['-mcpu=arm7tdmi', '-Os', '-Wextra', '-Wall', '-Werror',
                        '-fdata-sections', '-fomit-frame-pointer',
                        '-msoft-float', '-mthumb-interwork', '-mthumb'],
             CFLAGS = ['-Wbad-function-cast', '-Wmissing-prototypes'],
+            CXXFLAGS = ['-fno-threadsafe-statics'],
             ASFLAGS = ['-Wall', '-Werror', '-Os',
                        '-Wa,-mcpu=arm7tdmi,-mfpu=softfpa,-mthumb-interwork'])
 

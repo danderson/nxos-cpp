@@ -22,15 +22,9 @@
  * Default handlers for unknown IRQ and FIQ interrupts, and
  * the spurious IRQ handler and unknown exception handler.
  */
-	.global nx__default_irq
-	.global nx__default_fiq
-	.global nx__spurious_irq
-	.global nx__unhandled_exception
-nx__default_irq:
-nx__default_fiq:
-nx__spurious_irq:
-nx__unhandled_exception:
-	b nx__unhandled_exception
+	.global nxos__unhandled_exception
+nxos__unhandled_exception:
+	b nxos__unhandled_exception
 
 
 /**********************************************************
@@ -40,8 +34,8 @@ nx__unhandled_exception:
  * routing that was registered with the AIC for the given
  * IRQ.
  */
-	.global nx__irq_handler
-nx__irq_handler:
+	.global nxos__irq_handler
+nxos__irq_handler:
 	/* Save the return address and return processor mode registers
 	 * on the IRQ stack. This is needed to allow nested interrupts,
 	 * where a higher-priority interrupt halts execution of a lower
@@ -133,27 +127,7 @@ nx__irq_handler:
 	/* Restore execution to the main code. */
 	ldmfd sp!, {pc}^
 
-
-/**********************************************************
- * Abort entry points. These get run when the CPU enters
- * prefetch or data abort modes. These handlers just set
- * up the necessary arguments and invoke nx__abort().
- */
-	.extern nx__abort
-	.global nx__prefetch_abort_handler
-nx__prefetch_abort_handler:
-	sub r1, lr, #4
-	mov r0, #0
-	mrs r2, spsr
-	b nx__abort
-
-	.global nx__data_abort_handler
-nx__data_abort_handler:
-	sub r1, lr, #8
-	mov r0, #1
-	mrs r2, spsr
-	b nx__abort
-
+// TODO(dave): Reimplement aborts.
 
 /**********************************************************
  * Nested interrupt disable/enable routines. The
@@ -162,26 +136,23 @@ nx__data_abort_handler:
  * routine decrements the counter, and reenables interrupts
  * when the counter reaches zero.
  *
- * When the system boots, the internal counter is set to
- * interrupts disabled with 1 level of nesting (ie. calling
- * interrupts_enable once will enable interrupts).
+ * The counter is managed by the AIC driver. Its address
+ * is passed to these functions in r0.
  */
-	.global nx_interrupts_disable
-	.global nx_interrupts_enable
-nx_interrupts_disable:
-	mrs r0, cpsr
-	orr r0, r0, #IRQ_FIQ_MASK
-	msr cpsr_c, r0
+	.global nxos__interrupts_mask
+	.global nxos__interrupts_unmask
+nxos__interrupts_mask:
+	mrs r1, cpsr
+	orr r1, r1, #IRQ_FIQ_MASK
+	msr cpsr_c, r1
 
-	ldr r1, =interrupts_count
-	ldr r0, [r1]
-	add r0, r0, #1
-	str r0, [r1]
+	ldr r1, [r0]
+	add r1, r1, #1
+	str r1, [r0]
 
 	bx lr
 
-nx_interrupts_enable:
-	ldr r0, =interrupts_count
+nxos__interrupts_unmask:
 	ldr r1, [r0]
 	subs r1, r1, #1
 	str r1, [r0]
@@ -192,5 +163,3 @@ nx_interrupts_enable:
 	bic r0, r0, #IRQ_FIQ_MASK
 	msr cpsr_c, r0
 	bx lr
-
-interrupts_count:	.long 1

@@ -8,6 +8,7 @@
 
 #include "at91sam7s256.h"
 
+#include "base/aic.h"
 #include "base/types.h"
 
 
@@ -20,7 +21,7 @@ extern void nxos_appkernel_main(void);
 namespace {
 
 void init() {
-//   nx__aic_init();
+  nxos::AIC().Initialize();
 //   nx_interrupts_enable();
 //   nx__systick_init();
 //   nx__sound_init();
