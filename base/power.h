@@ -22,15 +22,13 @@ namespace nxos {
 
 class Power {
  public:
-  static inline void EnablePeripheral(U32 peripheral_id);
-  static inline void DisablePeripheral(U32 peripheral_id);
+  inline void EnablePeripheral(U32 peripheral_id);
+  inline void DisablePeripheral(U32 peripheral_id);
 
  private:
-  static inline void Initialize();
+  inline void Initialize();
 
   friend class Core;
-
-  DISALLOW_CONSTRUCTION(Power);
 };
 
 void Power::Initialize() {
@@ -51,6 +49,8 @@ void Power::DisablePeripheral(U32 peripheral_id) {
   if (peripheral_id == AT91C_ID_UDP)
     *AT91C_PMC_SCDR = AT91C_PMC_UDP;
 }
+
+extern Power g_power;
 
 }
 

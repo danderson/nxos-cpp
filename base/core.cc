@@ -32,7 +32,7 @@ class Core {
 
  private:
   static void init() {
-    Power::Initialize();
+    g_power.Initialize();
     AIC::Initialize();
     g_time.Initialize();
     AVR::Initialize();
