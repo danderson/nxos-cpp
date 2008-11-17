@@ -25,13 +25,13 @@ class Core;
 
 class Time {
  public:
-  static U32 Get() { return time_; }
-  static inline void Sleep(U32 millis);
+  U32 Get() { return time_; }
+  inline void Sleep(U32 millis);
 
  private:
-  static volatile U32 time_;
+  volatile U32 time_;
 
-  static void Initialize();
+  void Initialize();
   static void ISR();
 
   friend class Core;
@@ -42,6 +42,8 @@ void Time::Sleep(U32 millis) {
 
   while (time_ < final) {}
 }
+
+extern Time g_time;
 
 }  // namespace nxos
 

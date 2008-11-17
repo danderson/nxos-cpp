@@ -23,8 +23,6 @@ const U32 kTimerIrqFrequency = 1000;  // Hz
 
 namespace nxos {
 
-volatile U32 Time::time_ = 0;
-
 void Time::Initialize() {
   AIC::InstallHandler(kTimeIrqLine, AIC::PRIO_TICK,
                       AIC::TRIG_EDGE, ISR);
@@ -35,9 +33,11 @@ void Time::Initialize() {
 
 void Time::ISR() {
   const U32 status UNUSED = *AT91C_PITC_PIVR;
-  ++time_;
+  ++g_time.time_;
   Scheduler::Call();
   AVR::FastUpdate();
 }
+
+Time g_time;
 
 }  // namespace nxos

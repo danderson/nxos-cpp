@@ -34,7 +34,7 @@ class Core {
   static void init() {
     Power::Initialize();
     AIC::Initialize();
-    Time::Initialize();
+    g_time.Initialize();
     AVR::Initialize();
   }
 
