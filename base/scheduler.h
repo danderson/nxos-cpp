@@ -23,23 +23,23 @@ namespace nxos {
 
 class Scheduler {
  public:
-  static void Install(closure_ref_t scheduler);
-  static void Uninstall();
-  static inline void Call();
+  void Install(closure_ref_t scheduler);
+  void Uninstall();
+  inline void Call();
 
  private:
   static const U32 kSchedulerIrqLine = AT91C_ID_PWMC;
-  static closure_t scheduler_;
+  closure_t scheduler_;
 
   static void ISR();
-
-  DISALLOW_CONSTRUCTION(Scheduler);
 };
 
 void Scheduler::Call() {
   if (scheduler_)
     g_aic.Trigger(kSchedulerIrqLine);
 }
+
+extern Scheduler g_scheduler;
 
 }  // namespace nxos
 

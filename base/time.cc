@@ -34,7 +34,7 @@ void Time::Initialize() {
 void Time::ISR() {
   const U32 status UNUSED = *AT91C_PITC_PIVR;
   ++g_time.time_;
-  Scheduler::Call();
+  g_scheduler.Call();
   AVR::FastUpdate();
 }
 

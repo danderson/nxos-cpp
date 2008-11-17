@@ -14,8 +14,6 @@
 
 namespace nxos {
 
-closure_t Scheduler::scheduler_ = NULL;
-
 void Scheduler::Install(closure_ref_t scheduler) {
   const closure_t old_scheduler = scheduler_;
   scheduler_ = &scheduler;
@@ -33,7 +31,9 @@ void Scheduler::Uninstall() {
 
 void Scheduler::ISR() {
   g_aic.Clear(kSchedulerIrqLine);
-  scheduler_();
+  g_scheduler.scheduler_();
 }
+
+Scheduler g_scheduler;
 
 }  // namespace nxos
