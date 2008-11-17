@@ -9,6 +9,8 @@
 #include "at91sam7s256.h"
 
 #include "base/aic.h"
+#include "base/avr.h"
+#include "base/power.h"
 #include "base/time.h"
 #include "base/types.h"
 
@@ -33,6 +35,7 @@ class Core {
     Power::Initialize();
     AIC::Initialize();
     Time::Initialize();
+    AVR::Initialize();
   }
 
   static void halt() {}

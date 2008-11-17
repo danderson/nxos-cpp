@@ -9,6 +9,7 @@
 #include "at91sam7s256.h"
 
 #include "base/aic.h"
+#include "base/avr.h"
 #include "base/scheduler.h"
 #include "base/types.h"
 #include "base/time.h"
@@ -36,6 +37,7 @@ void Time::ISR() {
   const U32 status UNUSED = *AT91C_PITC_PIVR;
   ++time_;
   Scheduler::Call();
+  AVR::FastUpdate();
 }
 
 }  // namespace nxos
