@@ -35,7 +35,7 @@ class Core {
     g_power.Initialize();
     g_aic.Initialize();
     g_time.Initialize();
-    AVR::Initialize();
+    g_avr.Initialize();
 
     g_aic.UnmaskAll();
   }

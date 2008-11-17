@@ -187,24 +187,6 @@ inline U16 unmarshal_u16(const U8& buf) {
 }
 }  // namespace
 
-// Data coming from the AVR
-volatile U16 AVR::sensor_value_[kNumSensors] = { 0, 0, 0, 0 };
-volatile enum AVR::button AVR::button_ = AVR::NONE;
-volatile U32 AVR::battery_voltage_ = 0;
-volatile bool AVR::battery_is_pack_ = false;
-volatile U8 AVR::version_major_ = 0;
-volatile U8 AVR::version_minor_ = 0;
-
-// Data going to the AVR
-volatile bool AVR::power_off_ = false;
-volatile bool AVR::reset_ = false;
-volatile S8 AVR::motor_speed_[kNumMotors] = { 0, 0, 0 };
-volatile U8 AVR::motor_brake_ = 0;  // One bit per motor.
-
-enum AVR::state AVR::state_ = AVR::UNINITIALIZED;
-
-U8 AVR::buffer_[kReadPacketSize] = { 0 };
-
 void AVR::Initialize() {
   TWI::Initialize();
   state_ = LINK_DOWN;
@@ -329,14 +311,14 @@ void AVR::UpdateFromBuffer() {
   sensor_value_[3] = unmarshal_u16(buffer_[6]);
 
   // Unmarshal the button state.
-  const U16 button = unmarshal_u16(buffer_[8]);
-  if (button > 1023)
+  const U16 button_state = unmarshal_u16(buffer_[8]);
+  if (button_state > 1023)
     button_ = OK;
-  else if (button > 720)
+  else if (button_state > 720)
     button_ = CANCEL;
-  else if (button > 270)
+  else if (button_state > 270)
     button_ = RIGHT;
-  else if (button > 60)
+  else if (button_state > 60)
     button_ = LEFT;
   else
     button_ = NONE;
@@ -352,5 +334,7 @@ void AVR::UpdateFromBuffer() {
   battery_voltage_ = version_and_battery & 0x3FF;
   battery_voltage_ = (battery_voltage_ * 3545) >> 9;
 }
+
+AVR g_avr;
 
 }  // namespace nxos

@@ -29,30 +29,30 @@ class AVR {
     RIGHT
   };
 
-  static U16 sensor_value(U8 sensor) { return sensor_value_[sensor]; }
-  static enum button button() { return button_; }
-  static U32 battery_voltage() { return battery_voltage_; }
-  static bool battery_is_pack() { return battery_is_pack_; }
-  static U8 version_major() { return version_major_; }
-  static U8 version_minor() { return version_minor_; }
+  U16 sensor_value(U8 sensor) { return sensor_value_[sensor]; }
+  enum button button() { return button_; }
+  U32 battery_voltage() { return battery_voltage_; }
+  bool battery_is_pack() { return battery_is_pack_; }
+  U8 version_major() { return version_major_; }
+  U8 version_minor() { return version_minor_; }
 
-  static U8 PowerOff();
-  static U8 ResetMode();
+  U8 PowerOff();
+  U8 ResetMode();
 
  private:
   // Data coming from the AVR
-  static volatile U16 sensor_value_[kNumSensors];
-  static volatile enum button button_;
-  static volatile U32 battery_voltage_;
-  static volatile bool battery_is_pack_;
-  static volatile U8 version_major_;
-  static volatile U8 version_minor_;
+  volatile U16 sensor_value_[kNumSensors];
+  volatile enum button button_;
+  volatile U32 battery_voltage_;
+  volatile bool battery_is_pack_;
+  volatile U8 version_major_;
+  volatile U8 version_minor_;
 
   // Data going to the AVR
-  static volatile bool power_off_;
-  static volatile bool reset_;
-  static volatile S8 motor_speed_[kNumMotors];
-  static volatile U8 motor_brake_;  // One bit per motor.
+  volatile bool power_off_;
+  volatile bool reset_;
+  volatile S8 motor_speed_[kNumMotors];
+  volatile U8 motor_brake_;  // One bit per motor.
 
   enum state {
     UNINITIALIZED,      /* Not initialized yet. */
@@ -64,22 +64,26 @@ class AVR {
     RECV,               /* Reception of from_avr in progress. */
   };
 
-  static enum state state_;
+  enum state state_;
 
   static const U32 kReadPacketSize = 13;
   static const U32 kWritePacketSize = 9;
   // This buffer is used for both sending and receiving.
-  static U8 buffer_[kReadPacketSize];
+  U8 buffer_[kReadPacketSize];
 
-  static void Initialize();
-  static void FastUpdate();
+  //TWI twi_;
 
-  static void SerializeToBuffer();
-  static void UpdateFromBuffer();
+  void Initialize();
+  void FastUpdate();
+
+  void SerializeToBuffer();
+  void UpdateFromBuffer();
 
   friend class Core;
   friend class Time;
 };
+
+extern AVR g_avr;
 
 }  // namespace nxos
 
