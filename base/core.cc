@@ -24,14 +24,14 @@ namespace nxos {
 
 class Core {
  public:
-  static void main() {
+  void main() {
     init();
     nxos_appkernel_main();
     halt();
   }
 
  private:
-  static void init() {
+  void init() {
     g_power.Initialize();
     g_aic.Initialize();
     g_time.Initialize();
@@ -40,8 +40,10 @@ class Core {
     g_aic.UnmaskAll();
   }
 
-  static void halt() {}
+  void halt() {}
 };
+
+Core g_core;
 
 }  // namespace nxos
 
@@ -49,7 +51,7 @@ class Core {
 extern "C" {
 
 void nxos__baseplate_main(void) {
-  nxos::Core::main();
+  nxos::g_core.main();
 }
 
 }  // extern "C"
