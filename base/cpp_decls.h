@@ -13,14 +13,6 @@
 #ifndef __NXOS_BASE_CPP_DECLS_H__
 #define __NXOS_BASE_CPP_DECLS_H__
 
-#define DISALLOW_COPY_AND_ASSIGN(TypeName)      \
-  TypeName(const TypeName&);                    \
-  void operator=(const TypeName&)
-
-#define DISALLOW_CONSTRUCTION(TypeName)         \
-  TypeName();                                   \
-  DISALLOW_COPY_AND_ASSIGN(TypeName)
-
 #define UNUSED __attribute__((unused))
 
 #endif  // __NXOS_BASE_CPP_DECLS_H__
