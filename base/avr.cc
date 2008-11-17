@@ -59,8 +59,8 @@ volatile U8* TWI::buffer_ = NULL;
 volatile U32 TWI::buffer_len_ = 0;
 
 void TWI::Initialize() {
-  Power::EnablePeripheral(AT91C_ID_TWI);
-  Power::EnablePeripheral(AT91C_ID_PIOA);
+  g_power.EnablePeripheral(AT91C_ID_TWI);
+  g_power.EnablePeripheral(AT91C_ID_PIOA);
   *AT91C_TWI_IDR = ~0;
 
   /* If the system is rebooting, the coprocessor might believe that it
@@ -100,7 +100,7 @@ void TWI::Initialize() {
   *AT91C_TWI_CR = AT91C_TWI_MSEN;
 
   /* Install the TWI interrupt handler. */
-  AIC::InstallHandler(AT91C_ID_TWI, AIC::PRIO_RT, AIC::TRIG_LEVEL, ISR);
+  g_aic.InstallHandler(AT91C_ID_TWI, AIC::PRIO_RT, AIC::TRIG_LEVEL, ISR);
 }
 
 void TWI::Read(U8* buffer, U32 len) {

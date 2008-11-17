@@ -18,12 +18,6 @@
 #include "base/cpp_decls.h"
 #include "base/types.h"
 
-extern "C" {
-// Defined in interrupts.S
-extern void nxos__interrupts_mask(U8* mask_counter);
-extern void nxos__interrupts_unmask(U8* mask_counter);
-}
-
 namespace nxos {
 
 class AIC {
@@ -49,27 +43,26 @@ class AIC {
     TRIG_EDGE = 1,   /**< Edge-triggered interrupt. */
   };
 
-  static void Initialize();
+  void Initialize();
 
-  static void InstallHandler(U32 irq_id, enum aic_priority priority,
+  void InstallHandler(U32 irq_id, enum aic_priority priority,
                              enum aic_trigger_mode trigger_mode,
                              closure_t handler);
-  static void UninstallHandler(U32 irq_id);
+  void UninstallHandler(U32 irq_id);
 
-  static void Mask(U32 irq_id) { *AT91C_AIC_IECR = (1 << irq_id); }
-  static void Unmask(U32 irq_id) { *AT91C_AIC_IDCR = (1 << irq_id); }
-  static void Trigger(U32 irq_id) { *AT91C_AIC_ISCR = (1 << irq_id); }
-  static void Clear(U32 irq_id) { *AT91C_AIC_ICCR = (1 << irq_id); }
+  void Mask(U32 irq_id) { *AT91C_AIC_IECR = (1 << irq_id); }
+  void Unmask(U32 irq_id) { *AT91C_AIC_IDCR = (1 << irq_id); }
+  void Trigger(U32 irq_id) { *AT91C_AIC_ISCR = (1 << irq_id); }
+  void Clear(U32 irq_id) { *AT91C_AIC_ICCR = (1 << irq_id); }
 
-  static void MaskAll() { nxos__interrupts_mask(&mask_nesting_level_); }
-  static void UnmaskAll() { nxos__interrupts_unmask(&mask_nesting_level_); }
+  void MaskAll();
+  void UnmaskAll();
 
  private:
-  static U8 mask_nesting_level_;
-
-  // Constructors
-  DISALLOW_CONSTRUCTION(AIC);
+  U8 mask_nesting_level_;
 };
+
+extern AIC g_aic;
 
 }  // namespace nxos
 

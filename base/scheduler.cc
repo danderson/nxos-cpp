@@ -20,19 +20,19 @@ void Scheduler::Install(closure_ref_t scheduler) {
   const closure_t old_scheduler = scheduler_;
   scheduler_ = &scheduler;
   if (!old_scheduler)
-    AIC::InstallHandler(kSchedulerIrqLine, AIC::PRIO_SCHED,
-                        AIC::TRIG_EDGE, ISR);
+    g_aic.InstallHandler(kSchedulerIrqLine, AIC::PRIO_SCHED,
+                         AIC::TRIG_EDGE, ISR);
 }
 
 void Scheduler::Uninstall() {
   if (scheduler_) {
-    AIC::UninstallHandler(kSchedulerIrqLine);
+    g_aic.UninstallHandler(kSchedulerIrqLine);
     scheduler_ = NULL;
   }
 }
 
 void Scheduler::ISR() {
-  AIC::Clear(kSchedulerIrqLine);
+  g_aic.Clear(kSchedulerIrqLine);
   scheduler_();
 }
 

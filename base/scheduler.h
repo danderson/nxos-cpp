@@ -38,7 +38,7 @@ class Scheduler {
 
 void Scheduler::Call() {
   if (scheduler_)
-    AIC::Trigger(kSchedulerIrqLine);
+    g_aic.Trigger(kSchedulerIrqLine);
 }
 
 }  // namespace nxos

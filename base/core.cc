@@ -33,9 +33,11 @@ class Core {
  private:
   static void init() {
     g_power.Initialize();
-    AIC::Initialize();
+    g_aic.Initialize();
     g_time.Initialize();
     AVR::Initialize();
+
+    g_aic.UnmaskAll();
   }
 
   static void halt() {}

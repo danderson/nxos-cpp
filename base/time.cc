@@ -24,8 +24,8 @@ const U32 kTimerIrqFrequency = 1000;  // Hz
 namespace nxos {
 
 void Time::Initialize() {
-  AIC::InstallHandler(kTimeIrqLine, AIC::PRIO_TICK,
-                      AIC::TRIG_EDGE, ISR);
+  g_aic.InstallHandler(kTimeIrqLine, AIC::PRIO_TICK,
+                       AIC::TRIG_EDGE, ISR);
 
   *AT91C_PITC_PIMR = (((kTimerBaseFrequency / kTimerIrqFrequency) - 1) |
                       AT91C_PITC_PITEN | AT91C_PITC_PITIEN);

@@ -13,15 +13,17 @@
 
 extern "C" {
 // Defined in aic_asm.h
+extern void nxos__interrupts_mask(U8* mask_counter);
+extern void nxos__interrupts_unmask(U8* mask_counter);
 extern void nxos__unhandled_exception();
 }
 
 namespace nxos {
 
-U8 AIC::mask_nesting_level_ = 0;
-
 void AIC::Initialize() {
-  MaskAll();
+  // We're coming from the startup code, which left interrupts
+  // disabled. Therefore we need to initialize the nesting counter.
+  mask_nesting_level_ = 1;
 
   // If we're coming from a warm boot, the AIC may be in a weird
   // state. Do some cleaning up to bring the AIC back into a known
@@ -47,8 +49,6 @@ void AIC::Initialize() {
   }
   AT91C_AIC_SVR[AT91C_ID_FIQ] = (U32) nxos__unhandled_exception;
   *AT91C_AIC_SPU = (U32) nxos__unhandled_exception;
-
-  UnmaskAll();
 }
 
 void AIC::InstallHandler(U32 irq_id, enum aic_priority priority,
@@ -69,5 +69,15 @@ void AIC::UninstallHandler(U32 irq_id) {
 
   AT91C_AIC_SVR[irq_id] = (U32) nxos__unhandled_exception;
 }
+
+void AIC::MaskAll() {
+  nxos__interrupts_mask(&mask_nesting_level_);
+}
+
+void AIC::UnmaskAll() {
+  nxos__interrupts_unmask(&mask_nesting_level_);
+}
+
+AIC g_aic;
 
 }  // namespace nxos
