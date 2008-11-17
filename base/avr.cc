@@ -38,25 +38,21 @@ class TWI {
     RX_BUSY
   };
 
-  static void Initialize();
-  static void Read(U8* buffer, U32 len);
-  static void Write(const U8& buffer, U32 len);
+  void Initialize();
+  void Read(U8* buffer, U32 len);
+  void Write(const U8& buffer, U32 len);
 
-  static bool IsReady() { return state_ == READY; };
+  bool IsReady() { return state_ == READY; };
 
  private:
-  static volatile enum state state_;
-  static volatile U8* buffer_;
-  static volatile U32 buffer_len_;
+  volatile enum state state_;
+  volatile U8* buffer_;
+  volatile U32 buffer_len_;
 
   static void ISR();
-
-  DISALLOW_CONSTRUCTION(TWI);
 };
 
-volatile enum TWI::state TWI::state_ = READY;
-volatile U8* TWI::buffer_ = NULL;
-volatile U32 TWI::buffer_len_ = 0;
+TWI g_twi;
 
 void TWI::Initialize() {
   g_power.EnablePeripheral(AT91C_ID_TWI);
@@ -137,44 +133,44 @@ void TWI::ISR() {
   U32 status = *AT91C_TWI_SR;
 
   /* Read mode and the status indicates a byte was received. */
-  if (state_ == RX_BUSY && (status & AT91C_TWI_RXRDY)) {
-    *buffer_++ = *AT91C_TWI_RHR;
-    buffer_len_--;
+  if (g_twi.state_ == RX_BUSY && (status & AT91C_TWI_RXRDY)) {
+    *g_twi.buffer_++ = *AT91C_TWI_RHR;
+    g_twi.buffer_len_--;
 
     /* If only one byte is left to read, instruct the TWI to send a STOP
      * condition after the next byte.
      */
-    if (buffer_len_ == 1) {
+    if (g_twi.buffer_len_ == 1) {
       *AT91C_TWI_CR = AT91C_TWI_STOP;
     }
 
     /* If the read is over, inhibit all TWI interrupts and return to the
      * ready state.
      */
-    if (buffer_len_ == 0) {
+    if (g_twi.buffer_len_ == 0) {
       *AT91C_TWI_IDR = ~0;
-      state_ = READY;
+      g_twi.state_ = READY;
     }
   }
 
   /* Write mode and the status indicated a byte was transmitted. */
-  if (state_ == TX_BUSY && (status & AT91C_TWI_TXRDY)) {
+  if (g_twi.state_ == TX_BUSY && (status & AT91C_TWI_TXRDY)) {
     /* If that was the last byte, inhibit TWI interrupts and return to
      * the ready state.
      */
-    if (buffer_len_ == 0) {
+    if (g_twi.buffer_len_ == 0) {
       *AT91C_TWI_IDR = ~0;
-      state_ = READY;
+      g_twi.state_ = READY;
     } else {
       /* Instruct the TWI to send a STOP condition at the end of the
        * next byte if this is the last byte.
        */
-      if (buffer_len_ == 1)
+      if (g_twi.buffer_len_ == 1)
         *AT91C_TWI_CR = AT91C_TWI_STOP;
 
       /* Write the next byte to the transmit register. */
-      *AT91C_TWI_THR = *buffer_++;
-      buffer_len_--;
+      *AT91C_TWI_THR = *g_twi.buffer_++;
+      g_twi.buffer_len_--;
     }
   }
 }
@@ -188,7 +184,7 @@ inline U16 unmarshal_u16(const U8& buf) {
 }  // namespace
 
 void AVR::Initialize() {
-  TWI::Initialize();
+  g_twi.Initialize();
   state_ = LINK_DOWN;
 }
 
@@ -211,7 +207,7 @@ void AVR::FastUpdate() {
      * the brick powered down after a few minutes by an AVR that
      * doesn't see us coming up.
      */
-    TWI::Write(*kAvrHandshake, sizeof(kAvrHandshake)-1);
+    g_twi.Write(*kAvrHandshake, sizeof(kAvrHandshake)-1);
     state_ = INIT;
     break;
 
@@ -220,7 +216,7 @@ void AVR::FastUpdate() {
      * millisecond wait, which is accomplished by the use of two
      * intermediate state machine states.
      */
-    if (TWI::IsReady())
+    if (g_twi.IsReady())
       state_ = WAIT_2MS;
     break;
 
@@ -241,9 +237,9 @@ void AVR::FastUpdate() {
     /* If the transmission is complete, switch to receive mode and
      * read the status structure from the AVR.
      */
-    if (TWI::IsReady()) {
+    if (g_twi.IsReady()) {
       state_ = RECV;
-      TWI::Read(buffer_, kReadPacketSize);
+      g_twi.Read(buffer_, kReadPacketSize);
     }
 
   case RECV:
@@ -251,11 +247,11 @@ void AVR::FastUpdate() {
      * from_avr struct, pack the data in the to_avr struct into a raw
      * buffer, and shovel that over the i2c bus to the AVR.
      */
-    if (TWI::IsReady()) {
+    if (g_twi.IsReady()) {
       UpdateFromBuffer();
       state_ = SEND;
       SerializeToBuffer();
-      TWI::Write(*buffer_, kWritePacketSize);
+      g_twi.Write(*buffer_, kWritePacketSize);
     }
     break;
   }
