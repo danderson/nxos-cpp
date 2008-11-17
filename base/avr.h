@@ -13,6 +13,8 @@
 #ifndef __NXOS_BASE_AVR_H__
 #define __NXOS_BASE_AVR_H__
 
+#include "base/types.h"
+
 namespace nxos {
 
 const U32 kNumSensors = 4;
