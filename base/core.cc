@@ -40,7 +40,9 @@ class Core {
     g_aic.UnmaskAll();
   }
 
-  void halt() {}
+  void halt() {
+    g_avr.PowerOff();
+  }
 };
 
 Core g_core;

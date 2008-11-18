@@ -38,8 +38,8 @@ class AVR {
   U8 version_major() { return version_major_; }
   U8 version_minor() { return version_minor_; }
 
-  U8 PowerOff();
-  U8 ResetMode();
+  inline void PowerOff();
+  inline void ResetMode();
 
  private:
   // Data coming from the AVR
@@ -84,6 +84,16 @@ class AVR {
   friend class Core;
   friend class Time;
 };
+
+void AVR::PowerOff() {
+  power_off_ = true;
+  while (true) {}
+}
+
+void AVR::ResetMode() {
+  reset_ = true;
+  while (true) {}
+}
 
 extern AVR g_avr;
 
