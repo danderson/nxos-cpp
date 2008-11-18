@@ -10,13 +10,10 @@
 #include "base/time.h"
 
 using nxos::g_sound;
-using nxos::g_time;
 
 void nxos_appkernel_main() {
   g_sound.Initialize();
 
-  while (true) {
-    g_sound.PlayToneSync(2000, 1000);
-    g_time.Sleep(1000);
-  }
+  for (U32 frequency = 600; frequency <= 2400; frequency += 200)
+    g_sound.PlayToneSync(frequency, 200);
 }
