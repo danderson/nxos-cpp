@@ -130,7 +130,7 @@ void TWI::Write(const U8& buffer, U32 len) {
 
 void TWI::ISR() {
   /* Read the status register once to acknowledge all TWI interrupts. */
-  U32 status = *AT91C_TWI_SR;
+  const U32 status = *AT91C_TWI_SR;
 
   /* Read mode and the status indicates a byte was received. */
   if (g_twi.state_ == RX_BUSY && (status & AT91C_TWI_RXRDY)) {
