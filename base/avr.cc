@@ -56,7 +56,6 @@ TWI g_twi;
 
 void TWI::Initialize() {
   g_power.EnablePeripheral(AT91C_ID_TWI);
-  g_power.EnablePeripheral(AT91C_ID_PIOA);
   *AT91C_TWI_IDR = ~0;
 
   /* If the system is rebooting, the coprocessor might believe that it

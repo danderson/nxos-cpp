@@ -36,6 +36,7 @@ void Power::Initialize() {
   *AT91C_PMC_PCDR = 0x7FF4;
   *AT91C_PMC_SCDR = (AT91C_PMC_UDP | AT91C_PMC_PCK0 |
                      AT91C_PMC_PCK1 | AT91C_PMC_PCK2);
+  EnablePeripheral(AT91C_ID_PIOA);
 }
 
 void Power::EnablePeripheral(U32 peripheral_id) {
