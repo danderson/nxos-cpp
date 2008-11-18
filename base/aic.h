@@ -50,8 +50,8 @@ class AIC {
                              closure_t handler);
   void UninstallHandler(U32 irq_id);
 
-  void Mask(U32 irq_id) { *AT91C_AIC_IECR = (1 << irq_id); }
-  void Unmask(U32 irq_id) { *AT91C_AIC_IDCR = (1 << irq_id); }
+  void Mask(U32 irq_id) { *AT91C_AIC_IDCR = (1 << irq_id); }
+  void Unmask(U32 irq_id) { *AT91C_AIC_IECR = (1 << irq_id); }
   void Trigger(U32 irq_id) { *AT91C_AIC_ISCR = (1 << irq_id); }
   void Clear(U32 irq_id) { *AT91C_AIC_ICCR = (1 << irq_id); }
 
