@@ -39,13 +39,13 @@ void Power::Initialize() {
 }
 
 void Power::EnablePeripheral(U32 peripheral_id) {
-  *AT91C_PMC_PCER = peripheral_id;
+  *AT91C_PMC_PCER = (1 << peripheral_id);
   if (peripheral_id == AT91C_ID_UDP)
     *AT91C_PMC_SCER = AT91C_PMC_UDP;
 }
 
 void Power::DisablePeripheral(U32 peripheral_id) {
-  *AT91C_PMC_PCDR = peripheral_id;
+  *AT91C_PMC_PCDR = (1 << peripheral_id);
   if (peripheral_id == AT91C_ID_UDP)
     *AT91C_PMC_SCDR = AT91C_PMC_UDP;
 }
