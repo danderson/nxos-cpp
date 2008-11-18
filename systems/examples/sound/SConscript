@@ -1,0 +1,3 @@
+from glob import glob
+Import('env')
+env.AppKernel('sound', glob('*.cc'), kernelsize='5k')
