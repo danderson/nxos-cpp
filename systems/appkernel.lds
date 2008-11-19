@@ -80,7 +80,7 @@ SECTIONS {
   .ram_text : {
     . = ALIGN(16);
     *.oram(*.text *.text.* *.glue*) /* TODO: align? */
-    *.oram(*.rodata *.rodata.*) /* TODO(dave): move this. */
+    *.oram(*.rodata *.rodata.*)
     . = ALIGN(16);
   } > ram
   ROM_ONLY AT> rom
