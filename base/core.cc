@@ -52,7 +52,10 @@ Core g_core;
 
 extern "C" {
 
+#include "debug.h"
+
 void nxos__baseplate_main(void) {
+  //ChangeTone();
   nxos::g_core.main();
 }
 

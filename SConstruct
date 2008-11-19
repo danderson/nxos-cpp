@@ -105,21 +105,21 @@ def CheckDoxygen(context):
 
 def appkernel_tool(env):
     def AppKernelVariant(env, kernel_name, variant_name, app_kernel,
-                         app_kernel_lds, keep_lds_lines, delete_lds_lines):
+                         keep_lds_lines, delete_lds_lines):
         kvariant = '%s_%s' % (kernel_name, variant_name)
 
         # Build the variant's ld script...
         sed_args = (["-e 's/%s//'" % x for x in keep_lds_lines] +
                     ["-e '/%s/d'" % x for x in delete_lds_lines])
         variant_lds = env.Command(
-            kvariant + '.lds', [app_kernel_lds],
+            kvariant + '.lds', ['#systems/appkernel.lds'],
             "cat $SOURCES | sed %s > $TARGET" % ' '.join(sed_args))
 
         # ... Build the ELF kernel using that script...
         variant_kernel_elf = env.Command(
             kvariant + '.elf',
             [env['NXOS_BASEPLATE'], app_kernel, env['NXOS_LIBGCC']],
-            '$LINK -o $TARGET -T %s -Os --gc-sections '
+            '$LINK -o $TARGET -T %s -Os --gc-sections --print-gc-sections '
             '$SOURCES' % variant_lds[0].path)
         env.Depends(variant_kernel_elf, variant_lds)
 
@@ -128,13 +128,11 @@ def appkernel_tool(env):
             kvariant + '.bin', [variant_kernel_elf],
             '$OBJCOPY -O binary $SOURCES $TARGET')
 
-    def AppKernel(self, kernel_name, sources, kernelsize='50k',
-                  romkernelsize=None, kernelisbuilt=False):
-        romkernelsize = romkernelsize or kernelsize
+    def AppKernel(self, kernel_name, sources, kernelisbuilt=False):
         env = self.Copy()
         env.Append(CPPPATH=['#systems'])
 
-        # Build a .a with all the application kernel code.
+        # Build objects for all the appkernel components.
         if kernelisbuilt:
             app_kernel = sources
         else:
@@ -142,18 +140,11 @@ def appkernel_tool(env):
             for s in sources:
                 app_kernel.append(env.Object(s.split('.')[0], s))
 
-        # Generate an ld script with the right kernel size, then derive
-        # the samba and rom variants from that.
-        app_kernel_lds = env.Command(
-            '%s.lds' % kernel_name, ['#systems/appkernel.lds'],
-            "cat $SOURCES | sed -e 's/@RAM_KSIZE@/%s/' -e 's/@ROM_KSIZE@/%s/' "
-            ">$TARGET" % (kernelsize, romkernelsize))
-
         # Build the SAM-BA and ROM kernel variants.
-        AppKernelVariant(env, kernel_name, 'samba', app_kernel, app_kernel_lds,
-                         ['SAMBA_ONLY'], ['ROM_ONLY'])
-        AppKernelVariant(env, kernel_name, 'rom', app_kernel, app_kernel_lds,
-                         ['ROM_ONLY'], ['SAMBA_ONLY'])
+        AppKernelVariant(env, kernel_name, 'samba', app_kernel,
+                         ['SAM_ONLY'], ['ROM_ONLY'])
+        AppKernelVariant(env, kernel_name, 'rom', app_kernel,
+                         ['ROM_ONLY'], ['SAM_ONLY'])
     appkernel_func = new.instancemethod(AppKernel, env, env.__class__)
     env.AppKernel = appkernel_func
 

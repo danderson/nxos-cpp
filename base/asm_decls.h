@@ -25,6 +25,9 @@
  */
 /*@{*/
 
+/** The first address of RAM. */
+#define RAM_START 0x200000
+
 /** This bitmask disables IRQ and FIQ handling in the CPSR.
  *
  * It should be <tt>orr</tt>'d or <tt>bic</tt>'d with a CPSR or SPSR.

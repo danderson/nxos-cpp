@@ -26,7 +26,6 @@
 #define PMC_MCKR 0xFFFFFC30 /* Master Clock Register */
 
 #define MEM_START 0x0
-#define RAM_START 0x200000 /* The first address of RAM. */
 
 
 /**********************************************************

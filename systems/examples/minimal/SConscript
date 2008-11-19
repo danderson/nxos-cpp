@@ -1,3 +1,3 @@
 from glob import glob
 Import('env')
-env.AppKernel('minimal', glob('*.cc'), kernelsize='5k')
+env.AppKernel('minimal', glob('*.cc'))
