@@ -190,9 +190,9 @@ wait_mclk_3:
 
 
         /* Copy and initialize memory region. */
-        mem_copy __vectors_load_start__, __vectors_load_end__, __vectors_ram_start__
-        mem_copy __data_load_start__, __data_load_end__, __data_ram_start__
-        mem_copy __ramtext_load_start__, __ramtext_load_end__, __ramtext_ram_start__
+        mem_copy __vectors_load_start__, __vectors_load_end__, __vectors_start__
+        mem_copy __data_load_start__, __data_load_end__, __data_start__
+        mem_copy __ramtext_load_start__, __ramtext_load_end__, __ramtext_start__
         mem_initialise __bss_start__, __bss_end__, 0
         mem_initialise __stack_start__, __stack_end__, 0
 
@@ -211,7 +211,7 @@ wait_mclk_3:
 
         /* Set up the abort mode stack. */
         msr cpsr_c, #(MODE_ABT | IRQ_FIQ_MASK)
-        ldr sp, =__userspace_end__
+        ldr sp, =__ram_userspace_end__
         bic sp, sp, #7
 
         /* Set up the supervisor mode stack. */

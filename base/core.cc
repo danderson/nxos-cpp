@@ -10,28 +10,21 @@
 
 #include "base/aic.h"
 #include "base/avr.h"
+#include "base/memmap.h"
 #include "base/power.h"
 #include "base/time.h"
 #include "base/types.h"
 
 
-/* nxos_appkernel_main() is the entry point into the custom payload,
- * not included in the NxOS baseplate.
- */
+// nxos_appkernel_main() is the entry point into the custom payload,
+// not included in the NxOS baseplate.
 extern void nxos_appkernel_main(void);
 
 namespace nxos {
 
 class Core {
  public:
-  void main() {
-    init();
-    nxos_appkernel_main();
-    halt();
-  }
-
- private:
-  void init() {
+  static void Init() {
     g_power.Initialize();
     g_aic.Initialize();
     g_time.Initialize();
@@ -40,23 +33,38 @@ class Core {
     g_aic.UnmaskAll();
   }
 
-  void halt() {
+  static void Halt() {
     g_avr.PowerOff();
   }
-};
 
-Core g_core;
+  static void RunGlobalCtors() {
+    closure_t *ctors = reinterpret_cast<closure_t*>(memmap::kGlobalCtorsStart);
+    while (ctors != reinterpret_cast<closure_t*>(memmap::kGlobalCtorsEnd)) {
+      (*ctors)();
+      ++ctors;
+    }
+  }
+
+  static void RunGlobalDtors() {
+    closure_t *dtors = reinterpret_cast<closure_t*>(memmap::kGlobalDtorsStart);
+    while (dtors != reinterpret_cast<closure_t*>(memmap::kGlobalDtorsEnd)) {
+      (*dtors)();
+      ++dtors;
+    }
+  }
+};
 
 }  // namespace nxos
 
 
 extern "C" {
 
-#include "debug.h"
-
 void nxos__baseplate_main(void) {
-  //ChangeTone();
-  nxos::g_core.main();
+  Core::Init();
+  Core::RunGlobalCtors();
+  nxos_appkernel_main();
+  Core::RunGlobalDtors();
+  Core::Halt();
 }
 
 }  // extern "C"

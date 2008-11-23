@@ -33,15 +33,15 @@ vector_ram   : ORIGIN = 2M, LENGTH = 64
 ram          : ORIGIN = 2M + 64, LENGTH = 64K - 64 + 21
 }
 
-ROM_ONLY ROM_BASE = 1M;
-ROM_ONLY ROM_SIZE = 256k;
+ROM_BASE = 1M;
+ROM_SIZE = 256k;
 RAM_BASE = 2M;
 RAM_SIZE = 64k;
 SAM_ONLY SAMBA_RESERVED_SIZE = 0x2000;
 
 SECTIONS {
   SAM_ONLY __boot_from_samba__ = 1;
-  PROVIDE(__boot_from_samba__ = 0);
+  ROM_ONLY __boot_from_samba__ = 0;
 
   /*
    * Interrupt vectors. These are loaded to the bottom of memory at
@@ -53,8 +53,8 @@ SECTIONS {
   } > vector_ram
   ROM_ONLY AT> rom
 
-  __vectors_ram_start__  = ADDR(.vectors);
-  __vectors_ram_end__    = (ADDR(.vectors) + SIZEOF(.vectors));
+  __vectors_start__  = ADDR(.vectors);
+  __vectors_end__    = (ADDR(.vectors) + SIZEOF(.vectors));
   __vectors_load_start__ = LOADADDR(.vectors);
   __vectors_load_end__   = (LOADADDR(.vectors) + SIZEOF(.vectors));
 
@@ -85,8 +85,8 @@ SECTIONS {
   } > ram
   ROM_ONLY AT> rom
 
-  __ramtext_ram_start__ = ADDR(.ram_text);
-  __ramtext_ram_end__   = ADDR(.ram_text) + SIZEOF(.ram_text);
+  __ramtext_start__ = ADDR(.ram_text);
+  __ramtext_end__   = ADDR(.ram_text) + SIZEOF(.ram_text);
   __ramtext_load_start__ = LOADADDR(.ram_text);
   __ramtext_load_end__ = __ramtext_load_start__ + SIZEOF(.ram_text);
 
@@ -101,8 +101,8 @@ SECTIONS {
   } > ram
   ROM_ONLY AT> rom
 
-  __data_ram_start__ = ADDR(.data);
-  __data_ram_end__   = ADDR(.data) + SIZEOF(.data);
+  __data_start__ = ADDR(.data);
+  __data_end__   = ADDR(.data) + SIZEOF(.data);
   __data_load_start__ = LOADADDR(.data);
   __data_load_end__ = __data_load_start__ + SIZEOF(.data) ;
 
@@ -124,8 +124,38 @@ SECTIONS {
   __text_start__ = ADDR(.text);
   __text_end__ = ADDR(.text) + SIZEOF(.text);
 
-  ROM_ONLY __rom_userspace_start__ = ADDR(.text) + SIZEOF(.text);
+  /*
+   * Constructors and destructors for global objects.
+   *
+   * Note that we only collect these for code in
+   * systems/. By our coding policy, there should be
+   * no need for global construction/destruction in
+   * the baseplate or libs.
+   */
+  .ctors : {
+    . = ALIGN(16);
+    KEEP(systems\/* (*.ctors *.ctors*))
+  }
+  ROM_ONLY > rom
+  SAM_ONLY > ram
+
+  __global_ctors_start__ = ADDR(.ctors);
+  __global_ctors_end__ = ADDR(.ctors) + SIZEOF(.ctors);
+
+  .dtors : {
+    . = ALIGN(16);
+    KEEP(systems\/* (*.dtors *.dtors*))
+  }
+  ROM_ONLY > rom
+  SAM_ONLY > ram
+
+  __global_dtors_start__ = ADDR(.dtors);
+  __global_dtors_end__ = ADDR(.dtors) + SIZEOF(.dtors);
+
+
+  ROM_ONLY __rom_userspace_start__ = ADDR(.dtors) + SIZEOF(.dtors);
   SAM_ONLY __rom_userspace_start__ = 0;
+  __rom_userspace_end__ = ROM_BASE + ROM_SIZE;
 
   /*
    * The following parts are mildly confusing. When the kernel is
@@ -207,8 +237,8 @@ SECTIONS {
    * Variables defined to inform the kernel of how much RAM remains
    * behind the loaded kernel.
    */
-  __userspace_start__ = __stack_end__;
-  __userspace_end__   = RAM_BASE + RAM_SIZE;
+  __ram_userspace_start__ = __stack_end__;
+  __ram_userspace_end__   = RAM_BASE + RAM_SIZE;
 
   /*
    * Discard anything we haven't allocated at this point. It's stuff
