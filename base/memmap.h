@@ -18,52 +18,53 @@
 #ifndef __NXOS_BASE_MEMMAP_H__
 #define __NXOS_BASE_MEMMAP_H__
 
+#include "base/cpp_decls.h"
 #include "base/types.h"
 
 #define SYMADDR(Symbol) static_cast<const U8*>(&Symbol)
 
-#define DECLSYMS(Symbol, ConstName)					\
-  namespace {								\
-    extern "C" {							\
-      extern const U8 __Symbol_start__;					\
-      extern const U8 __Symbol_end__;					\
-    }									\
-  }									\
-  const U8* const kConstNameStart = SYMADDR(__Symbol_start__);		\
-  const U8* const kConstNameEnd = SYMADDR(__Symbol_end__);		\
-  const U32 kConstNameSize =						\
-    static_cast<const U32>(kConstNameEnd - kConstNameStart)
+#define DECLSYMS_INTERNAL(SymStart, SymEnd, ConstStart,                 \
+                          ConstEnd, ConstSize)                          \
+  namespace {                                                           \
+    extern "C" {                                                        \
+    extern const U8 SymStart;                                           \
+    extern const U8 SymEnd;                                             \
+    }                                                                   \
+  }                                                                     \
+  const U8* const ConstStart UNUSED = SYMADDR(SymStart);                \
+  const U8* const ConstEnd UNUSED = SYMADDR(SymEnd);                    \
+  const U32 ConstSize UNUSED =                                          \
+      static_cast<const U32>(ConstEnd - ConstStart)
+
+
+#define DECLSYMS(Symbol, ConstName)                                     \
+  DECLSYMS_INTERNAL(__ ## Symbol ## _start__,                           \
+                    __ ## Symbol ## _end__,                             \
+                    k ## ConstName ## Start,                            \
+                    k ## ConstName ## End,                              \
+                    k ## ConstName ## Size)
 
 namespace nxos {
-  namespace memmap {
-    // Indicates the source of the boot. This is more informative than
-    // the other constants here, but it can be interesting to know.
-    namespace {
-      extern "C" {
-	extern const U8 __boot_from_samba__;
-      }
-    }
-    const bool kBootedFromSamba =
-      static_cast<const bool>(SYMADDR(__boot_from_samba__));
-    const bool kBootedFromRom = !kBootedFromSamba;
+namespace memmap {
 
-    // The following constants are defined by GNU ld at the linking
-    // phase. They describe the memory map of the NXT in terms of
-    // symbols.
-    DECLSYMS(ramtext, RAMText);
-    DECLSYMS(text, Text);
-    DECLSYMS(global_ctors, GlobalCtors);
-    DECLSYMS(global_dtors, GlobalDtors);
-    DECLSYMS(data, Data);
-    DECLSYMS(bss, BSS);
-    DECLSYMS(stack, Stack);
-    DECLSYMS(rom_userspace, ROMUserspace);
-    DECLSYMS(ram_userspace, RAMUserspace);
+// The following constants are defined by GNU ld at the linking
+// phase. They describe the memory map of the NXT in terms of
+// symbols.
+DECLSYMS(ramtext, RAMText);
+DECLSYMS(text, Text);
+DECLSYMS(global_ctors, GlobalCtors);
+DECLSYMS(global_dtors, GlobalDtors);
+DECLSYMS(data, Data);
+DECLSYMS(bss, BSS);
+DECLSYMS(stack, Stack);
+DECLSYMS(rom_userspace, ROMUserspace);
+DECLSYMS(ram_userspace, RAMUserspace);
 
-  } // namespace memmap
+} // namespace memmap
 }  // namespace nxos
 
 #undef DECLSYMS
+#undef DECLSYMS_INTERNAL
 #undef SYMADDR
 
 #endif /* __NXOS_BASE_MEMMAP_H__ */

@@ -40,9 +40,6 @@ RAM_SIZE = 64k;
 SAM_ONLY SAMBA_RESERVED_SIZE = 0x2000;
 
 SECTIONS {
-  SAM_ONLY __boot_from_samba__ = 1;
-  ROM_ONLY __boot_from_samba__ = 0;
-
   /*
    * Interrupt vectors. These are loaded to the bottom of memory at
    * boot time.
