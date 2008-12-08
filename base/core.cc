@@ -38,16 +38,24 @@ class Core {
   }
 
   static void RunGlobalCtors() {
-    closure_t *ctors = reinterpret_cast<closure_t*>(memmap::kGlobalCtorsStart);
-    while (ctors != reinterpret_cast<closure_t*>(memmap::kGlobalCtorsEnd)) {
+    const closure_t* ctors =
+        reinterpret_cast<const closure_t*>(memmap::kGlobalCtorsStart);
+    const closure_t* ctors_end =
+        reinterpret_cast<const closure_t*>(memmap::kGlobalCtorsEnd);
+
+    while (ctors != ctors_end) {
       (*ctors)();
       ++ctors;
     }
   }
 
   static void RunGlobalDtors() {
-    closure_t *dtors = reinterpret_cast<closure_t*>(memmap::kGlobalDtorsStart);
-    while (dtors != reinterpret_cast<closure_t*>(memmap::kGlobalDtorsEnd)) {
+    const closure_t *dtors =
+        reinterpret_cast<const closure_t*>(memmap::kGlobalDtorsStart);
+    const closure_t *dtors_end =
+        reinterpret_cast<const closure_t*>(memmap::kGlobalDtorsEnd);
+
+    while (dtors != dtors_end) {
       (*dtors)();
       ++dtors;
     }
@@ -60,11 +68,11 @@ class Core {
 extern "C" {
 
 void nxos__baseplate_main(void) {
-  Core::Init();
-  Core::RunGlobalCtors();
+  nxos::Core::Init();
+  nxos::Core::RunGlobalCtors();
   nxos_appkernel_main();
-  Core::RunGlobalDtors();
-  Core::Halt();
+  nxos::Core::RunGlobalDtors();
+  nxos::Core::Halt();
 }
 
 }  // extern "C"
